@@ -1,25 +1,71 @@
-import React from 'react'
-import { useState } from 'react'
-import './App.css'
+import React from "react";
+import { useState, useEffect } from "react";
+import "./App.css";
 
+const url = "https://api.github.com/users";
 function App() {
-  const [count,setCount] = useState(0);
-  let num = 3;
-  const add = ()=> {
-    setCount(count + num)
+  const [user, setUser] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isError, setIsError] = useState(false);
+
+  async function getUser() {
+    const response = await fetch(url);
+    const userData = await response.json();
+    
+    setIsLoading(false);
+    if (response.status > 300) {
+      setIsError(true)
+      isLoading(false)
+    }
+    setUser(userData);
   }
-  const del = ()=> {
-    setCount(count - num)
+  useEffect(() => {
+    getUser();
+    console.log("UseEffect");
+  }, []);
+  if (isLoading) {
+    return (
+      <div>
+        <div className="loader">
+          <div className="loader-inner">
+            <div className="loader-line-wrap">
+              <div className="loader-line"></div>
+            </div>
+            <div className="loader-line-wrap">
+              <div className="loader-line"></div>
+            </div>
+            <div className="loader-line-wrap">
+              <div className="loader-line"></div>
+            </div>
+            <div className="loader-line-wrap">
+              <div className="loader-line"></div>
+            </div>
+            <div className="loader-line-wrap">
+              <div className="loader-line"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
-  console.log(add)
-  
-  return(
-    <div>
-      <h1>Count {count}</h1>
-      <button onClick={add}>Add</button>
-      <button onClick={del}>delete</button>
+  if(isError) {
+    return <h1 style={{textAlign: "center"}} >Opps is Error</h1>
+  }
+  return (
+    <div className="container">
+      <h1>Github users</h1>
+      <ul className="users">
+        {user.map((user) => {
+          return (
+            <ul key={user.id}>
+              <img src={user.avatar_url} alt={user.login}></img>
+              <h4>{user.login}</h4>
+            </ul>
+          );
+        })}
+      </ul>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
