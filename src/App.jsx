@@ -1,24 +1,51 @@
 import React from "react";
-import { useState, useEffect, useRef } from "react";
+import { useReducer, useRef} from "react";
 import "./App.css";
 
-const url = "https://api.github.com/users";
-function App() {
-  const [text , setText] = useState("");
-  const textRef = useRef(null);
-  function handleForm(e) {
-    e.preventDefault();
-    setText(textRef.current.value)
+const intialValue = {
+  people: [],
+};
+
+function reducer(state, action) {
+  if (action.type === "PEOPLE_ADDED") {
+    const newPeople = [...state.people, action.payload]
+
+    return {...state, people: newPeople}
   }
-  return(
-    <div>
-    <h3>{text}</h3>
-      <form onSubmit={handleForm}>
-        <input type="text" ref={textRef} placeholder="Enter"></input>
+}
+
+function App() {
+  const [state, dispatch] = useReducer(reducer , intialValue);
+
+  const inputRef = useRef(null)
+
+  function submitHandler(e) {
+    e.preventDefault();
+
+    const newItem = {id: Math.random(),name: inputRef.current.value}
+    dispatch({type: "PEOPLE_ADDED", payload: newItem})
+
+    inputRef.current.value = "";
+  }
+
+  return (
+    <>
+      <form onSubmit={submitHandler}>
+        <h1>Form</h1>
+        <input
+          type="text"
+          placeholder="Enter your text"
+          ref={inputRef}
+        />
         <button type="submit">Submit</button>
       </form>
-    </div>
-  )
+      <ul>
+        {state.people.map((people)=> {
+          return <li key={people.id}>{people.name}</li>
+        })}
+      </ul>
+    </>
+  );
 }
 
 export default App;
